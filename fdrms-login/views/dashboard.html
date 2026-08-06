@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · FDRMS</title>
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="dash-shell">
+
+  <div class="dash-top">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C12 2 6 9.5 6 14a6 6 0 0012 0c0-4.5-6-12-6-12z" stroke="#0B2545" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      FDRMS
+    </div>
+    <div class="user-chip">
+      <span id="userName">Loading…</span>
+      <span class="role-pill" id="rolePill">—</span>
+      <button id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <div class="icon-ok">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>You're authenticated.</h1>
+    <p id="welcomeText">Verifying your session…</p>
+    <p>This confirms Module 1 — Login &amp; Authentication — is working end-to-end: role-based sign in, session handling, and access control.</p>
+    <div class="module-note">Modules 2–9 (Disaster Reporting, Victim Registration, Relief Camp Management, Rescue Teams, Resource Allocation, Donations, Notifications, Reports) connect here.</div>
+  </div>
+
+<script>
+  (async () => {
+    try {
+      const res = await fetch("/api/me");
+      if (!res.ok) { window.location.href = "/login.html"; return; }
+      const data = await res.json();
+      document.getElementById("userName").textContent = data.user.full_name;
+      document.getElementById("rolePill").textContent = data.roleLabel;
+      document.getElementById("welcomeText").textContent =
+        `Signed in as ${data.user.email} — role: ${data.roleLabel}.`;
+    } catch (e) {
+      window.location.href = "/login.html";
+    }
+  })();
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await fetch("/api/logout", { method: "POST" });
+    window.location.href = "/login.html";
+  });
+</script>
+</body>
+</html>

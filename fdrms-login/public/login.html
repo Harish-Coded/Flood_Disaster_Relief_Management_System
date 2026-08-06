@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sign in · FDRMS</title>
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- ============== FULL-SCREEN BACKGROUND SCENE ============== -->
+<div class="bg-scene">
+
+  <svg class="contours" viewBox="0 0 1440 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M-50,650 C250,580 450,720 750,640 C1000,570 1200,680 1490,600" stroke="rgba(233,234,236,0.5)" stroke-width="1" fill="none"/>
+    <path d="M-50,720 C280,660 500,780 780,700 C1050,630 1250,730 1490,660" stroke="rgba(233,234,236,0.35)" stroke-width="1" fill="none"/>
+    <path d="M-50,790 C300,740 520,830 800,760 C1080,690 1280,780 1490,720" stroke="rgba(233,234,236,0.25)" stroke-width="1" fill="none"/>
+    <path d="M-50,560 C220,500 420,620 720,540 C980,470 1180,570 1490,490" stroke="rgba(233,234,236,0.35)" stroke-width="1" fill="none"/>
+    <path d="M-50,470 C200,420 400,530 680,460 C940,400 1140,490 1490,410" stroke="rgba(233,234,236,0.2)" stroke-width="1" fill="none"/>
+    <path d="M-50,340 C220,290 440,390 720,330 C980,280 1180,360 1490,300" stroke="rgba(233,234,236,0.14)" stroke-width="1" fill="none"/>
+  </svg>
+
+  <div class="bg-top">
+    <div class="bg-brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C12 2 6 9.5 6 14a6 6 0 0012 0c0-4.5-6-12-6-12z" stroke="#2B2D31" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="name">FDRMS<span>FLOOD DISASTER RELIEF MANAGEMENT SYSTEM</span></div>
+    </div>
+    <div class="status-pill">REGION · KALAVAKKAM SECTOR &nbsp;—&nbsp; <strong>WATCH: MODERATE</strong></div>
+  </div>
+
+  <div class="bg-headline">
+    <h1>Coordinate relief before the water rises further.</h1>
+    <p>One secure entry point for administrators, disaster management officers, field volunteers, and citizens reporting or requesting help.</p>
+  </div>
+
+  <div class="bg-stats-left">
+    <div class="bg-stat"><div class="num">14</div><div class="lbl">ACTIVE CAMPS</div></div>
+    <div class="bg-stat"><div class="num">37</div><div class="lbl">RESCUE TEAMS</div></div>
+  </div>
+
+  <div class="bg-stats-right">
+    <div class="bg-stat"><div class="num">2.1k</div><div class="lbl">CITIZENS AIDED</div></div>
+    <div class="bg-stat"><div class="num">96%</div><div class="lbl">REPORTS RESOLVED</div></div>
+  </div>
+
+  <div class="tide-strip">
+    <svg class="tide-wave" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,50 C100,20 200,80 300,50 C400,20 500,80 600,50 C700,20 800,80 900,50 C1000,20 1100,80 1200,50 L1200,120 L0,120 Z" fill="rgba(108,122,137,0.4)"/>
+    </svg>
+    <svg class="tide-wave slow" viewBox="0 0 1200 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,65 C100,40 200,90 300,65 C400,40 500,90 600,65 C700,40 800,90 900,65 C1000,40 1100,90 1200,65 L1200,120 L0,120 Z" fill="rgba(154,165,177,0.35)"/>
+    </svg>
+  </div>
+
+  <div class="bg-foot">MODULE 01 · LOGIN &amp; AUTHENTICATION</div>
+</div>
+
+<!-- ============== CENTERED LIQUID-GLASS LOGIN CARD ============== -->
+<div class="center-wrap">
+  <div class="glass-card">
+    <p class="eyebrow">Secure sign in</p>
+    <h2>Welcome back</h2>
+    <p class="sub">Select your role and sign in to continue.</p>
+
+    <div id="alertBox" class="alert alert-error"></div>
+
+    <div class="role-tabs" id="roleTabs">
+      <div class="role-tab active" data-role="citizen"><span>🧍</span>Citizen</div>
+      <div class="role-tab" data-role="volunteer"><span>🚑</span>Volunteer</div>
+      <div class="role-tab" data-role="officer"><span>🛰️</span>Officer</div>
+      <div class="role-tab" data-role="admin"><span>🛡️</span>Admin</div>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+
+      <div class="form-meta">
+        <label><input type="checkbox" id="remember" /> Keep me signed in</label>
+        <a href="#" id="forgotLink">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn">Sign in</button>
+    </form>
+
+    <p class="switch-line">New citizen or volunteer? <a href="/register.html">Create an account</a></p>
+
+    <div class="demo-box">
+      <strong>Demo credentials (seeded)</strong>
+      admin@fdrms.gov.in / Admin@123<br/>
+      officer@fdrms.gov.in / Officer@123<br/>
+      volunteer@fdrms.gov.in / Volunteer@123<br/>
+      citizen@fdrms.gov.in / Citizen@123
+    </div>
+  </div>
+</div>
+
+<script src="/js/login.js"></script>
+</body>
+</html>
