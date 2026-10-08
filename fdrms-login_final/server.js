@@ -1,6 +1,6 @@
 // server.js
 // Module 1: Login & Authentication — Flood Disaster Relief Management System
-// Module 9: Reports — Flood Disaster Relief Management System
+// Module 8: Reports — Flood Disaster Relief Management System
 //
 // Implements:
 //  - Citizen self-registration
@@ -29,7 +29,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "module1_login", "public")));
+app.use(express.static(path.join(__dirname, "module2_dashboard", "public")));
+app.use(express.static(path.join(__dirname, "module8_reports", "public")));
 app.use((req, res, next) => {
   if (req.path.startsWith("/api/") && ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)
       && (!req.body || typeof req.body !== "object" || Array.isArray(req.body))) {
@@ -43,7 +45,7 @@ app.use(
     // NOTE: uses the built-in MemoryStore, which is fine for this single-process
     // demo/dev module. For a production deployment, swap in a persistent store
     // (e.g. connect-sqlite3, connect-redis) backed by the MySQL/other DB from the SRS.
-    secret: "fdrms-module1-dev-secret-change-in-production",
+    secret: process.env.FDRMS_SESSION_SECRET || "fdrms-module1-dev-secret-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -80,7 +82,7 @@ function requireRole(role) {
   };
 }
 
-// Reports (Module 9) is shared by Administrator and Officer roles only.
+// Reports (Module 8) is shared by Administrator and Officer roles only.
 function requireAnyRole(roles) {
   return (req, res, next) => {
     if (!req.session.user) return res.status(401).json({ success: false, error: "Authentication required." });
@@ -322,7 +324,7 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-// ---------- API: reports (Module 9) — Administrator / Officer only ----------
+// ---------- API: reports (Module 8) — Administrator / Officer only ----------
 
 // Summary counts: users by role, active/inactive, and login success/failure totals.
 app.get("/api/reports/summary", requireAnyRole(["admin", "officer"]), (req, res) => {
@@ -419,22 +421,22 @@ app.get("/api/reports/users", requireAnyRole(["admin", "officer"]), (req, res) =
 // ---------- protected dashboard routes ----------
 
 app.get("/dashboard/admin.html", requireRole("admin"), (req, res) =>
-  res.sendFile(path.join(__dirname, "views", "dashboard.html"))
+  res.sendFile(path.join(__dirname, "module2_dashboard", "views", "dashboard.html"))
 );
 app.get("/dashboard/officer.html", requireRole("officer"), (req, res) =>
-  res.sendFile(path.join(__dirname, "views", "dashboard.html"))
+  res.sendFile(path.join(__dirname, "module2_dashboard", "views", "dashboard.html"))
 );
 app.get("/dashboard/volunteer.html", requireRole("volunteer"), (req, res) =>
-  res.sendFile(path.join(__dirname, "views", "dashboard.html"))
+  res.sendFile(path.join(__dirname, "module2_dashboard", "views", "dashboard.html"))
 );
 app.get("/dashboard/citizen.html", requireRole("citizen"), (req, res) =>
-  res.sendFile(path.join(__dirname, "views", "dashboard.html"))
+  res.sendFile(path.join(__dirname, "module2_dashboard", "views", "dashboard.html"))
 );
 
 app.get(
   "/dashboard/reports.html",
   requireAnyRole(["admin", "officer"]),
-  (req, res) => res.sendFile(path.join(__dirname, "views", "reports.html"))
+  (req, res) => res.sendFile(path.join(__dirname, "module8_reports", "views", "reports.html"))
 );
 
 app.get("/", (req, res) => res.redirect("/login.html"));

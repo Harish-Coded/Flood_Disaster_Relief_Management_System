@@ -1,156 +1,56 @@
 # Flood Disaster Relief Management System
 
-Demonstration system built with Node.js, Express, SQLite and static HTML. It includes role-based login and reports, plus operational modules for flood incidents, victims, camps, rescue teams, resources and allocations, donations, emergency requests, notifications and volunteer field activity.
+Node.js and Express application for role-based access, flood response operations, notifications, and reporting. It uses SQLite through `better-sqlite3` and serves a static HTML/CSS/JavaScript interface.
 
-## What's included
-
-- **Role-based login** — one login form, four roles (Administrator, Disaster
-  Management Officer, Volunteer, Citizen). The account's stored role must match
-  the selected role tab to sign in.
-- **Citizen / Volunteer self-registration** — matches the SRS access model,
-  where Admin and Officer accounts are provisioned internally rather than
-  self-registered.
-- **Secure password storage** — passwords are hashed with bcrypt, never stored
-  or logged in plain text.
-- **Session-based authentication** — `express-session` cookies, 4-hour expiry,
-  `httpOnly` cookies.
-- **Login audit trail** — every login attempt (success or failure) is recorded
-  in a `login_audit` table with timestamp and IP, useful for the SRS's
-  "Secure authentication" non-functional requirement.
-- **Role-protected routes** — each dashboard route checks the session role
-  before rendering; a citizen cannot open the admin dashboard URL directly.
-- **Role-specific operations dashboard** — each role has a tailored module list and live summary counts.
-- **Operational APIs** — role-checked record creation and status updates, citizen-owned incident/request views, safe stock allocation, rescue assignment, victim camp assignment with capacity checks, notifications and field activities.
-- **Admin database backup** — `GET /api/backup` downloads a consistent SQLite backup.
-- **Demo data** — initialization creates sample camps, incidents, victims, rescue teams, resources, donations, a request, notifications and activity when the operational tables are empty.
-- **Reports (Module 9)** — Administrator/Officer-only dashboard at
-  `/dashboard/reports.html`:
-  - Summary cards: total/active/deactivated users, total login attempts,
-    failed attempts, login success rate.
-  - Users-by-role breakdown (bar chart, built from live data).
-  - Full login audit trail (who, when, which role, success/fail, IP).
-  - Registered user roster (name, email, phone, role, status, join date, last
-    login).
-  - Volunteers and Citizens get a `403 Forbidden` if they hit the Reports URL
-    or API directly — access is enforced server-side, not just hidden in the
-    UI.
-
-## Tech stack
-
-| Layer      | Choice                                   |
-|------------|-------------------------------------------|
-| Backend    | Node.js + Express                         |
-| Database   | SQLite (via `better-sqlite3`)             |
-| Auth       | `express-session` + `bcryptjs`            |
-| Frontend   | Static HTML/CSS/JS (no framework needed)  |
-
-> The SRS lists MySQL as the target database. This module uses SQLite so it
-> runs anywhere with zero external setup — the schema in `db/init.js` maps
-> directly onto a `users` table you can recreate in MySQL for the full
-> project (see **Moving to MySQL** below).
-
-## Folder structure
+## Architecture
 
 ```
-fdrms-login/
-├── db/
-│   └── init.js          # creates + seeds the SQLite database
-├── public/
-│   ├── login.html        # login page
-│   ├── register.html     # citizen/volunteer sign-up page
-│   ├── css/styles.css    # shared styling (login, dashboard, reports)
-│   └── js/
-│       ├── login.js
-│       ├── register.js
-│       └── reports.js    # Module 9 client logic
-├── views/
-│   ├── dashboard.html    # shared placeholder dashboard (role-aware)
-│   └── reports.html      # Module 9 Reports dashboard
-├── server.js              # Express app: routes, auth logic, session handling, reports API
-├── package.json
-└── README.md
+module1_login/             Login, registration, and browser scripts
+module2_dashboard/         Shared role-aware operations dashboard and styles
+module3_user_management/   User management scope (user roster is in Reports)
+module4_inventory/         Inventory and resource allocation API scope
+module5_orders/            Relief/emergency request API scope
+module6_billing/           Donations API scope
+module7_notifications/      Notifications and volunteer activity API scope
+module8_reports/            Administrator/Officer reports page and browser logic
+db/                         Shared SQLite initialization and database file
+server.js                   Express entry point, shared middleware and API routes
+package.json                Dependencies and npm commands
 ```
 
-## Setup
+The existing application implements authentication, the shared operations dashboard, and reports as complete features. Operational records (incidents, victims, camps, rescue teams, resources, donations, emergency requests, activities, and notifications) use the role-checked `/api/modules/:module` endpoints in `server.js`; specialized allocation and assignment endpoints are also registered there. Modules 3–7 are represented by these API capabilities and dashboard sections; they do not yet have standalone page bundles.
 
-Requires **Node.js 18+**.
+Static assets are stored with their owning UI module and mounted by Express in `server.js`. The database initializer and database location remain shared at the root `db/` level. `FDRMS_DB_PATH` can override the default SQLite file path. `FDRMS_SESSION_SECRET` can override the development session secret, and `PORT` can override the default port `3000`.
+
+## Start the application
+
+Requires Node.js 18 or newer.
 
 ```bash
-cd fdrms-login
-npm install          # installs express, better-sqlite3, bcryptjs, express-session
-npm run initdb        # creates db/fdrms.db and seeds demo accounts (safe to re-run)
-npm start              # starts the server on http://localhost:3000
+npm install
+npm run initdb
+npm start
 ```
 
-Then open **http://localhost:3000** in a browser — it redirects to the login page.
+Open <http://localhost:3000>. The initializer is safe to rerun and creates demo accounts and operational sample data when needed.
 
-## Demo accounts (seeded automatically)
+## Demo accounts
 
-| Role                          | Email                        | Password       |
-|--------------------------------|-------------------------------|-----------------|
-| Administrator                  | admin@fdrms.gov.in            | Admin@123       |
-| Disaster Management Officer    | officer@fdrms.gov.in          | Officer@123     |
-| Volunteer                      | volunteer@fdrms.gov.in        | Volunteer@123   |
-| Citizen                        | citizen@fdrms.gov.in          | Citizen@123     |
+| Role | Email | Password |
+| --- | --- | --- |
+| Administrator | `admin@fdrms.gov.in` | `Admin@123` |
+| Disaster Management Officer | `officer@fdrms.gov.in` | `Officer@123` |
+| Volunteer | `volunteer@fdrms.gov.in` | `Volunteer@123` |
+| Citizen | `citizen@fdrms.gov.in` | `Citizen@123` |
 
-Select the matching role tab on the login page before signing in — the module
-checks that the account's actual role matches the tab you selected.
+Choose the matching role on the login screen. Citizens and Volunteers can self-register; Administrator and Officer accounts are provisioned internally.
 
-To test self-registration, use **Create an account** on the login page (Citizen
-or Volunteer only, matching the SRS's public-facing roles).
+## Main routes
 
-## Operational modules and access
+- `POST /api/login`, `POST /api/register`, `POST /api/logout`, and `GET /api/me` handle sessions and authentication.
+- `GET /api/dashboard` supplies role-aware summary data.
+- `GET|POST /api/modules/:module` lists or creates supported operational records; `PATCH /api/modules/:module/:id` updates permitted records.
+- `POST /api/allocate`, `POST /api/assign-team`, and `POST /api/assign-victim` perform guarded operational assignments. `GET /api/backup` is Administrator-only.
+- `/dashboard/reports.html` and `/api/reports/{summary,audit,users}` are restricted to Administrators and Officers.
 
-Administrators and Officers manage operational records. Citizens can report incidents and request help, and can view public camps. Volunteers can submit field activities and see notifications. API role checks run on the server. Operational list and create endpoints use `/api/modules/:module` with module names `incidents`, `victims`, `camps`, `teams`, `resources`, `donations`, `requests`, `activities` and `notifications`. Admin/Officer allocation and assignment endpoints are `/api/allocate`, `/api/assign-team` and `/api/assign-victim`.
-
-## Trying the Reports module
-
-1. Log in as `admin@fdrms.gov.in` / `Admin@123` (or the Officer account).
-2. On the dashboard, click **Open Reports →**.
-3. You'll see summary stats, a users-by-role breakdown, the full login audit
-   trail, and the registered-user roster, all pulled live from the same
-   SQLite database as Module 1.
-4. Log in as the Volunteer or Citizen demo account and try opening
-   `/dashboard/reports.html` directly — you'll get a `403 Forbidden`, since
-   Reports access is role-checked on the server, not just hidden in the UI.
-
-## How the pieces map to your SRS
-
-- **5. Functional Requirements → Login** (all four roles) → `POST /api/login`
-- **6. Non-Functional Requirements → Secure authentication** → bcrypt hashing,
-  `httpOnly` session cookies, login audit table
-- **6. Non-Functional Requirements → Fast response time** → SQLite lookups are
-  sub-millisecond; no external calls in the auth path
-- **9. WBS → Development → Login Module** → this entire package
-
-## Moving to MySQL later
-
-The `users` table in `db/init.js` is written in plain SQL and maps directly:
-
-```sql
-CREATE TABLE users (
-  id            INT AUTO_INCREMENT PRIMARY KEY,
-  full_name     VARCHAR(255) NOT NULL,
-  email         VARCHAR(255) NOT NULL UNIQUE,
-  phone         VARCHAR(20),
-  password_hash VARCHAR(255) NOT NULL,
-  role          ENUM('admin','officer','volunteer','citizen') NOT NULL,
-  is_active     TINYINT(1) NOT NULL DEFAULT 1,
-  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_login    TIMESTAMP NULL
-);
-```
-
-Swap `better-sqlite3` for `mysql2`, replace the `db.prepare(...).run/get()` calls
-in `server.js` with `mysql2` query equivalents, and the rest of the module
-(routes, sessions, hashing, validation) stays the same.
-
-## Notes for your report / viva
-
-- Passwords are never stored in plain text (bcrypt, salt rounds = 10).
-- Sessions expire after 4 hours of inactivity by default (`cookie.maxAge`).
-- Every login attempt — successful or not — is written to `login_audit` for
-  traceability, addressing the SRS's disaster-response accountability needs.
-- Role selection is enforced server-side, not just hidden in the UI, so a
-  citizen account cannot be used to reach the admin dashboard even by guessing
-  the URL.
+Every protected endpoint enforces access on the server. Passwords are stored as bcrypt hashes, and login attempts are recorded in `login_audit`.
